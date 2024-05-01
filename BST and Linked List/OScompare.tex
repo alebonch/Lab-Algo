@@ -60,6 +60,7 @@ In this report we are going to compare the different implementations regarding d
 \begin{itemize}
     \item BST without the size attribute
     \item Ordered List
+    \item ARN
 \end{itemize}
 \subsection{Test technical specs}
 The tests are all executed on the same machine, which runs on:\begin{itemize}
@@ -73,6 +74,8 @@ The code has been written and executed on Visual Studio Code (1.88.1) while this
 A sorted list is a data structure that maintains its elements in a particular order, typically either in ascending or descending order. This arrangement allows for efficient searching, insertion, and deletion operations. When new elements are added to a sorted list, they are inserted into the appropriate position to maintain the sorted order. Similarly, when elements are removed, the list adjusts to maintain the order. 
 \subsection{BST}
 A \textbf{B}inary \textbf{S}earch \textbf{T}ree is a kind of binary tree in which each vertex can have up to two children. This structure adheres to the BST property, stipulating that every vertex in the left subtree of a given vertex must carry a value smaller than that of the given vertex, and every vertex in the right subtree must carry a value larger. To go through this data structure, we use the \textit{inorderTreeWalk} method that works recursively. There are two versions for this method, one each for OS algorithm.
+\subsection{ARN}
+In comparison to those of the previous binary search trees, the nodes of red-black trees have additional attributes: color, useful during insertion to maintain the tree balanced, and \textit{size}, representing the size of the subtree rooted at that node.
 \section{Order Statistics}
 Dynamic order statistics are a class of problems that require efficiently maintaining and querying a sequence of sorted elements. The OS-Select and OS-Rank algorithms are two operations of fundamental importance in this context:
 \begin{itemize}
@@ -159,45 +162,53 @@ $\text{self.found} \leftarrow \text{False}$\\
 }
 \Return $i$
 \end{algorithm}
-\section{Differences beetween the data structures}
-For what concerns the \textit{OS\_Rank} algorithm, there are these main differences:
-\begin{table}[H]
-                \centering
-                \begin{tabular}{|c|c|}
-                    \hline
-                    \textbf{Data Structure} & \textbf{Time complexity} \\
-                    \hline
-                    List & {$O(n)$} \\
-                    \hline
-                    BST & {$O(n + \log n)$} \\
-                    \hline
-                    \end{tabular}
-                \caption{OS\_Rank time complexity.}
-\end{table}
-Explained as follows:
-\begin{itemize}
-    \item \textbf{List:} The algorithm can traverse the list until it reaches the specified node and count the number of preceding nodes. Since the list is sorted, the algorithm can find the rank of the node in $O(n)$ operations, where $n$ is the size of the list.
-    \item \textbf{BST:} The algorithm performs an in-order traversal of the binary search tree until it finds the specified node. After finding the node, it counts how many nodes precede the found node during the in-order traversal. Since an in-order traversal has a cost of $O(n)$ and searching for the node may require $O(\log n)$ operations in the worst case, the approximate cost of OS\_Rank is $O(n + \log n)$.
-\end{itemize}
-On the other hand, if we look at the \textit{OS\_Select} algorithm, we can deduce these results:
-\begin{table}[H]
-                \centering
-                \begin{tabular}{|c|c|}
-                    \hline
-                    \textbf{Data Structure} & \textbf{Time complexity} \\
-                    \hline
-                    List & {$O(i)$} \\
-                    \hline
-                    BST & {$O(n)$} \\
-                    \hline
-                    \end{tabular}
-                \caption{OS\_Select time complexity.}
-\end{table}
-Explained as follows:
-\begin{itemize}
-    \item \textbf{List:} The algorithm iterates the list until it reaches the $i$-th element. Since we are referring to a Sorted List, the algorithm will iterate a maximum number of times corresponding to $i$. 
-    \item \textbf{BST:} The algorithm performs an in-order traversal of the binary search tree until it finds the node at the desired position $i$. The cost of an in-order traversal of a binary search tree is $O(n)$, where $n$ is the number of nodes in the tree.
-\end{itemize}
+\subsection{Order statistics in ARN} 
+
+The \textit{OS Select} algorithm starts from the root and compares the value of \( k \) with the \textit{size} value of the left child: if they are equal, it means that the root is the \( k \)-th element, so the process ends; if the value of \( k \) is smaller, it means that the \( k \)-th element is in the left subtree, and the algorithm is recursively called on that subtree; if the value of \( k \) is greater, it means that the \( k \)-th element is in the right subtree, and the algorithm is called on that subtree, subtracting from \( k \) the \textit{size} value of the left child and the root. 
+
+The \textit{OS Rank} algorithm, instead, starts by calculating the size of the left subtree of the input node \( x \). Then it traverses the tree up to the root: every time it encounters a node as the right child of its parent, it means that all nodes of the left subtree of the parent and the parent itself precede it, so in this case, a counter is incremented with the size of the left subtree of the parent plus 1; if instead the node is encountered as the left child of its parent, the counter is left unchanged. When the loop reaches the root of the tree, the value of the counter represents the position of the node \( x \) in the sorted sequence of nodes.
+
+\subsubsection{Pseudocodes}
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwIn{Index $i$}
+\KwOut{Node with rank $i$}
+$x \leftarrow root$\;
+found $\leftarrow$ False\;
+\While{not found and $x \neq$ None}{
+    $j \leftarrow (x.left.size$ se $x.left \neq$ None altrimenti $0) + 1$\;
+    \If{$j == i$}{
+        found $\leftarrow$ True\;
+    }\ElseIf{$i < j$}{
+        $x \leftarrow x.left$\;
+    }\Else{
+        $x \leftarrow x.right$\;
+        $i \leftarrow i - j$\;
+    }
+}
+\Return $x$\;
+\end{algorithm}
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwIn{Node $x$}
+\KwOut{Rank of $x$}
+$i \leftarrow (x.left.size$ se $x.left \neq$ None altrimenti $0) + 1$\;
+$y \leftarrow x$\;
+\While{$y \neq$ self.root}{
+    \If{$y \neq y.p.right$}{
+        $i \leftarrow i + (y.p.left.size$ se $y.p.left \neq$ None altrimenti $0) + 1$\;
+    }
+    $y \leftarrow y.p$\;
+}
+\Return $i$\;
+\end{algorithm}
+
+\section{Expected results}
+Since the OS algorithms on ordered lists operate by traversing the elements of the list, we can expect a complexity of $O(n)$. The same reasoning can be applied regarding ABRs since the implementation logic is analogous. Finally, concerning ARNs, given that the \textit{OS algorithms} traverse the tree vertically, we can expect a complexity of $O(h)$, which in balanced trees like red-black trees is equivalent to $O(lg(n))$.
+
+It is also interesting to reflect on the different results obtained by requesting pointers or positioning indices of nodes at the top of the list compared to those at the bottom. In this regard, it is reasonable to assume that structures like ordered lists or unbalanced ABRs are faster when dealing with the first elements of the ordered sequence; conversely, balanced binary trees (including red-black trees, which are balanced by definition) should report similar performances regardless of the nodes/indices they have to work with.
+
+
 \section{Tests and results}
 We will analyze the behavior of the OS algorithms in cases where the data has been inserted sequentially or randomly (using the Python language's \textit{random} library). We will conduct tests on arrays with:
 \begin{itemize}
@@ -221,11 +232,7 @@ The reason for choosing this approach is that in this way, it will be much easie
 
 \subsection{Analysis of experimental results}
 \subsubsection{100 elements}
-For the analysis of this case, we will choose $K = 50$.
-We can immediately see the linear trend of the OS algorithms for both the data structures, but, as expected, by the initial differences that have been highlighted, the List is by far better than the BST.
-
-
-
+From these initial tests, it is possible to notice the linear behavior of the OS algorithms on ordered lists and binary search trees (BST), and the logarithmic behavior regarding red-black trees (ARN). It can also be noted how, even for relatively small data structures, the performance of the algorithms on binary search trees is significantly worse compared to cases of lists and red-black trees, which in this initial scenario report similar performances (especially regarding the OS Select function).
 
 \begin{figure}[H]
   \centering
@@ -279,9 +286,7 @@ We can immediately see the linear trend of the OS algorithms for both the data s
 
 In this case, we will choose $K = 100$. 
 Figures
-\ref{fig:OS Rank Random Insert 500} - \ref{fig:OS Select Sequential Insert 500} confirm the hypotheses formulated in the previous case regarding the linear trend for lists and BST trees. However, it can be observed that, for larger data structures, the implementation on sorted lists is still better, but there is not a significant change in the gap between the data structures.
-
-It can be noted that the gap in the first range of the Seuquential Inserts (\ref{fig:OS Rank Sequential Insert 500} and \ref{fig:OS Select Sequential Insert 500}) is getting narrower.
+\ref{fig:OS Rank Random Insert 500} - \ref{fig:OS Select Sequential Insert 500} confirm the hypotheses formulated in the previous case regarding the linear behavior (for lists and ABR) and logarithmic behavior (for ARN). However, it can be observed that for larger data structures, the implementation on ARN is faster compared to that on ordered lists, while the gap with the approach that uses BST starts to widen increasingly.
 
  \begin{figure}[H]
   \centering
@@ -333,17 +338,13 @@ It can be noted that the gap in the first range of the Seuquential Inserts (\ref
 \end{figure}
 \subsubsection{1000 elements}
 
-In this case, we will also choose $K = 100$. Having established in previous cases the complexity of the different implementations of the OS algorithms, in this instance, we will only comment on the graphs that allow us to compare them. Indeed, by observing figures \ref{fig:OS Rank Random Insert 1000}-\ref{fig:OS Select Sequential Insert 1000}, it can be noted that, for large data structures, the OS algorithms perform in the same way as the previous test.
+In this case, we'll also choose $K = 100$. Having verified in previous cases the complexity of the different implementations of the OS algorithms, in this instance, we'll only comment on the graphs that allow us to compare them. By observing Figures \ref{fig:OS Rank Random Insert 1000}-\ref{fig:OS Select Sequential Insert 1000}, it can be noted that for large data structures, the OS algorithms perform much better in the case of ARNs with the 'size' attribute, while the gap in terms of execution time between the implementation on BST and those on other data structures is even more evident.
 
-Now let's analyze the average execution times for the three ranges of indices/nodes input to the OS Select and OS Rank functions, as observable in \ref{fig:OS Rank Random Insert 1000 Table}-\ref{fig:OS Select Sequential Insert 1000 Table}. 
+Now, let's analyze the average execution times for the three ranges of indices/nodes entering the OS Select and OS Rank functions, as observable in Figures \ref{fig:OS Rank Random Insert 1000 Table}-\ref{fig:OS Select Sequential Insert 1000 Table}. We immediately notice that the performances in the case of ARNs are similar in all three ranges, and this situation doesn't change even if the data insertion is randomized, since the insertFixup() function precisely maintains the tree balanced with each new insertion. 
 
-In the case of sorted lists, we notice that the algorithms are faster in the lower range and slower in the higher range, because the indices/nodes are searched starting from the first ones. Few differences occur in the case of random insertion, since, being the list sorted, the order of the nodes in the list is not influenced by their insertion order.
+In the case of ordered lists, on the other hand, we notice how the algorithms are faster in the lower range and slower in the higher one; this is because the indices/nodes are searched starting from the first ones. Few differences, instead, in the case of random insertion, since, being the list ordered, the order of the nodes in the list is not influenced by their insertion order.
 
-As for BST trees with sequential insertion, we can make a similar observation to that made for lists, the implementations of the OS algorithms on these data structures are based on the same fundamental idea (we can also think that a completely unbalanced binary tree becomes a list)
-
-As noted in the last test, the gap in the Sequential Inserts, as the number of elements grows, gets narrower.
-
-
+As for BSTs with sequential insertion, we can make a similar argument to the one made for lists, since the implementations of the OS algorithms on these data structures are based on the same underlying idea (we can also think that a completely unbalanced binary tree becomes a list). In the case of random insertion, however, we find ourselves with a definitely more balanced tree, and this is also reflected in the performances, which, as in the case of ARN, are now more balanced.
  \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\linewidth]{Images/1000/OS Rank Random Insert 1000.png}
@@ -393,7 +394,11 @@ As noted in the last test, the gap in the Sequential Inserts, as the number of e
   \label{fig:OS Select Sequential Insert 1000 Table}
 \end{figure}
 \subsubsection{1500 elements}
-For this last test, it was necessary to grant VisualStudio Code the use of more memory to handle the high number of recursive calls. Again, we will only observe the graphs that compare the performance on different data structures(\ref{fig:OS Rank Random Insert 1500} - \ref{fig:OS Select Sequential Insert 1500}), printed by choosing $K = 300$. These last tests only confirm the observations made in previous cases, showing how the implementation on both the data structures share the same trend, since there is no significant change in the gap between the two.
+For this final test, it was necessary to allocate more memory to VisualStudio to handle the high number of recursive calls.
+
+In this case as well, we will only observe the graphs that compare the performances on different data structures (Figures 18 and 19), printed by choosing $K = 300$.
+
+These last tests only confirm the observations made in previous cases, showing how the implementation on BST becomes less performant as the input sizes increase, while the implementation on ARN maintains satisfactory execution times even in the face of much larger data structures.
  \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\linewidth]{Images/1500/OS Rank Random Insert 1500.png}
@@ -443,11 +448,11 @@ For this last test, it was necessary to grant VisualStudio Code the use of more 
   \label{fig:OS Select Sequential Insert 1500 Table}
 \end{figure}
 \section{Test discussion and conclusions}
-The test results reaffirm the hypothesis:
+The results of the tests conducted confirm the hypotheses made previously regarding the complexity of the OS algorithms in the different implementations: we are talking about $O(n)$ for ordered lists and search trees and $O(lg(n))$ for ARNs, regardless of the type of insertion adopted.
 
-Sorted lists are a valid choice for small-sized data structures, especially fast when dealing with the first elements of the list.
-Finally, the implementation for BST without the size attribute has proven to be the least effective, as the absence of such a parameter makes it impossible to exploit the potential of the data structure and instead forces a much less elaborate approach similar to that adopted for lists. Performance on BSTs is significantly worse due to the time spent descending and ascending the tree through recursive calls, and even when the tree is more balanced, the performance improvement is relative.
+The implementation for ARNs with the size attribute proves to be the most performant in general and reports similar performances regardless of the requested node/index.
 
-In terms of performance concerning the number of elements, however, both implementations have not undergone significant changes to highlight further differences if we only consider the last elements, while the data structures share the same results, with a bigger set of elements, with the first few elements. 
+Ordered lists, on the other hand, are a valid choice for data structures of small sizes, particularly fast when dealing with the first elements of the list.
+
+Finally, the implementation for BSTs without the size attribute has proven to be the least effective, as the absence of this parameter makes it impossible to exploit the potential of the data structure and instead forces a much less elaborate approach similar to that adopted for lists. The performances on BSTs are much worse due to the time spent descending and ascending the tree through recursive calls, and even when the tree is more balanced, the improvement in terms of performance is relative.
 \end{document}
-
