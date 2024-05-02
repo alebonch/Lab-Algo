@@ -62,9 +62,7 @@ def plotSortGraph(algType, insertType, arrayDim, plot=True):
 
 
 if __name__ == '__main__':
-    size = [50, 100, 300, 500]
-    [[[plotSortGraph(i, j, s) for i in range(2)] for j in range(2)] for s in size]
-    '''plt.plot(plotSortGraph(0, 0)[0], plotSortGraph(0, 0)[1], label='SelectionSort')
-    plt.plot(plotSortGraph(1, 0)[0], plotSortGraph(1, 0)[1], label='MergeSort')
+    plt.plot(plotSortGraph(1, 1, 500, False)[0], plotSortGraph(1, 1, 500, False)[1], label='QuickSort')
+    plt.plot(plotSortGraph(0, 1, 500, False)[0], plotSortGraph(0, 1, 500, False)[1], label='InsertionSort')
     plt.legend()
-    plt.show()'''
+    plt.show()
